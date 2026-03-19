@@ -1,6 +1,5 @@
-console.log("DEPLOY CHECK");
 "use client";
-
+console.log("DEPLOY CHECK");
 import { useState } from "react";
 import NewsFeed from "../components/NewsFeed";
 import SponsorBanner from "../components/SponsorBanner";
