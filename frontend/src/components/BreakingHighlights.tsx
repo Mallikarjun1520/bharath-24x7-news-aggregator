@@ -2,27 +2,13 @@
 
 import { Clock } from "lucide-react";
 
-// ✅ Proper Type Definition
-type Article = {
-  _id: string;
-  title: string;
-  publishedAt?: string; // optional to avoid crashes if missing
-};
-
-// ✅ Props Type
-type BreakingHighlightsProps = {
-  articles: Article[];
-};
-
-export default function BreakingHighlights({ articles }: BreakingHighlightsProps) {
-  // ✅ Check if within last 24 hours
+export default function BreakingHighlights({ articles }: { articles: any[] }) {
   const isWithin24Hours = (dateStr: string) => {
     const now = Date.now();
     const published = new Date(dateStr).getTime();
     return now - published <= 24 * 60 * 60 * 1000;
   };
 
-  // ✅ Format time ago
   const timeAgo = (dateStr: string) => {
     const now = Date.now();
     const diff = now - new Date(dateStr).getTime();
@@ -35,9 +21,8 @@ export default function BreakingHighlights({ articles }: BreakingHighlightsProps
     return `${hrs}h ago`;
   };
 
-  // ✅ Safe filtering (handles undefined publishedAt)
   const breaking = (articles || [])
-    .filter((a) => a.publishedAt && isWithin24Hours(a.publishedAt))
+    .filter((a: any) => a?.publishedAt && isWithin24Hours(a.publishedAt))
     .slice(0, 10);
 
   if (breaking.length === 0) return null;
@@ -46,12 +31,11 @@ export default function BreakingHighlights({ articles }: BreakingHighlightsProps
     <div>
       <h3>🔴 Breaking</h3>
 
-      {breaking.map((article) => (
+      {breaking.map((article: any) => (
         <div key={article._id}>
           <p>{article.title}</p>
           <small>
-            <Clock size={12} />{" "}
-            {article.publishedAt ? timeAgo(article.publishedAt) : "Unknown time"}
+            <Clock size={12} /> {timeAgo(article.publishedAt)}
           </small>
         </div>
       ))}
