@@ -38,15 +38,10 @@ export default function BreakingHighlights({ articles }: any) {
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="breaking-item"
           >
-            <span className="breaking-title">
-              {article.title}
-            </span>
-
-            <span className="breaking-time">
-              <Clock size={12} style={{ marginRight: "4px" }} />
-              {timeAgo(article.publishedAt)}
+            <span>{article.title}</span>
+            <span>
+              <Clock size={12} /> {timeAgo(article.publishedAt)}
             </span>
           </a>
         ))}
