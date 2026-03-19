@@ -1,10 +1,26 @@
 "use client";
+
 import Fuse from "fuse.js";
 import SearchBar from "./SearchBar";
 import BreakingHighlights from "./BreakingHighlights";
 import { useEffect, useRef, useState, useCallback } from "react";
-import NewsCard, { Article } from "./NewsCard";
+import NewsCard from "./NewsCard";
 import LoaderSkeleton from "./LoaderSkeleton";
+
+/**
+ * ✅ FIXED Article type (single source of truth here)
+ */
+interface Article {
+  _id: string;
+  title: string;
+  summary?: string;
+  content?: string;
+  url: string;
+  imageUrl?: string;
+  sourceName?: string;
+  tags?: string[];
+  publishedAt: string; // ✅ CRITICAL FIX
+}
 
 interface NewsFeedProps {
   category: string;
@@ -66,17 +82,17 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
         if (incoming.length < PAGE_SIZE) setHasMore(false);
 
         setArticles((prev) => {
-  const combined =
-    pageNum === 1 ? incoming : [...prev, ...incoming];
+          const combined =
+            pageNum === 1 ? incoming : [...prev, ...incoming];
 
-  // 🔥 Remove duplicates by _id
-  const uniqueMap = new Map();
-  combined.forEach((article) => {
-    uniqueMap.set(article._id, article);
-  });
+          // 🔥 Remove duplicates
+          const uniqueMap = new Map();
+          combined.forEach((article) => {
+            uniqueMap.set(article._id, article);
+          });
 
-  return Array.from(uniqueMap.values());
-});
+          return Array.from(uniqueMap.values());
+        });
       } catch {
         if (pageNum === 1) {
           setArticles(getMockArticles(category, pageNum));
@@ -96,7 +112,7 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
       setInitialized(true);
       fetchPage(1);
     }
-  }, [isActive, initialized]);
+  }, [isActive, initialized, fetchPage]);
 
   useEffect(() => {
     if (!initialized) return;
@@ -134,24 +150,21 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
   if (!isActive) return null;
   if (initialLoading) return <LoaderSkeleton />;
 
-  // 🔎 FILTER LOGIC
- let filteredArticles = articles;
+  // 🔎 SEARCH
+  let filteredArticles = articles;
 
-if (query.trim() !== "") {
-  const fuse = new Fuse(articles, {
-    keys: ["title", "summary", "content"],
-    threshold: 0.4, // lower = stricter, higher = more tolerant
-    includeScore: true,
-  });
+  if (query.trim() !== "") {
+    const fuse = new Fuse(articles, {
+      keys: ["title", "summary", "content"],
+      threshold: 0.4,
+      includeScore: true,
+    });
 
-  filteredArticles = fuse
-    .search(query)
-    .map((result) => result.item);
-}
+    filteredArticles = fuse.search(query).map((r) => r.item);
+  }
 
   return (
     <div className="news-feed-container">
-      {/* 🔎 SEARCH BAR */}
       <SearchBar query={query} setQuery={setQuery} />
 
       {filteredArticles.length === 0 ? (
@@ -160,29 +173,17 @@ if (query.trim() !== "") {
         </div>
       ) : (
         <>
-          {/* 🔴 BREAKING (based on filtered results) */}
           <BreakingHighlights articles={filteredArticles} />
 
-          {/* 🔥 HERO */}
           {filteredArticles[0] && (
             <div className="hero-wrapper">
-              <NewsCard
-                key={filteredArticles[0]._id}
-                article={filteredArticles[0]}
-                index={0}
-                isHero
-              />
+              <NewsCard article={filteredArticles[0]} />
             </div>
           )}
 
-          {/* 📰 GRID */}
           <div className="news-grid">
-            {filteredArticles.slice(1).map((article, i) => (
-              <NewsCard
-                key={article._id}
-                article={article}
-                index={i + 1}
-              />
+            {filteredArticles.slice(1).map((article) => (
+              <NewsCard key={article._id} article={article} />
             ))}
           </div>
         </>
