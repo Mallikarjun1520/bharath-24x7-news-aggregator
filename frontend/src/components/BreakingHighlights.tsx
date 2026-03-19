@@ -2,33 +2,27 @@
 
 import { Clock } from "lucide-react";
 
-interface BreakingHighlightsProps {
-  articles: any[]; // ✅ force type safety bypass
-}
+export default function BreakingHighlights({ articles }: any) {
+  const isWithin24Hours = (dateStr: string) => {
+    const now = Date.now();
+    const published = new Date(dateStr).getTime();
+    return now - published <= 24 * 60 * 60 * 1000;
+  };
 
-function isWithin24Hours(dateStr: string) {
-  const now = Date.now();
-  const published = new Date(dateStr).getTime();
-  return now - published <= 24 * 60 * 60 * 1000;
-}
+  const timeAgo = (dateStr: string) => {
+    const now = Date.now();
+    const diff = now - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
 
-function timeAgo(dateStr: string) {
-  const now = Date.now();
-  const diff = now - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
 
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs}h ago`;
+  };
 
-  const hrs = Math.floor(mins / 60);
-  return `${hrs}h ago`;
-}
-
-export default function BreakingHighlights({
-  articles,
-}: BreakingHighlightsProps) {
-  const breaking = articles
-    .filter((a: any) => isWithin24Hours(a.publishedAt))
+  const breaking = (articles || [])
+    .filter((a: any) => a?.publishedAt && isWithin24Hours(a.publishedAt))
     .slice(0, 10);
 
   if (breaking.length === 0) return null;
