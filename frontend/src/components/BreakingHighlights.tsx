@@ -2,7 +2,7 @@
 
 import { Clock } from "lucide-react";
 
-export default function BreakingHighlights({ articles }: any) {
+export default function BreakingHighlights({ articles }: { articles: any[] }) {
   const isWithin24Hours = (dateStr: string) => {
     const now = Date.now();
     const published = new Date(dateStr).getTime();
@@ -28,24 +28,17 @@ export default function BreakingHighlights({ articles }: any) {
   if (breaking.length === 0) return null;
 
   return (
-    <div className="breaking-container">
-      <div className="breaking-label">🔴 BREAKING</div>
+    <div>
+      <h3>🔴 Breaking</h3>
 
-      <div className="breaking-scroll">
-        {breaking.map((article: any) => (
-          <a
-            key={article._id}
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span>{article.title}</span>
-            <span>
-              <Clock size={12} /> {timeAgo(article.publishedAt)}
-            </span>
-          </a>
-        ))}
-      </div>
+      {breaking.map((article: any) => (
+        <div key={article._id}>
+          <p>{article.title}</p>
+          <small>
+            <Clock size={12} /> {timeAgo(article.publishedAt)}
+          </small>
+        </div>
+      ))}
     </div>
   );
 }
