@@ -1,3 +1,4 @@
+console.log("DEPLOY CHECK");
 "use client";
 
 import { useState } from "react";
