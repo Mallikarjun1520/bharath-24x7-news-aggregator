@@ -1,75 +1,81 @@
 "use client";
 
-import React from "react";
-
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+import Link from "next/link";
 
 export interface Article {
   _id: string;
   title: string;
-  summary: string;
-  imageUrl?: string;
   url: string;
+  imageUrl?: string;
+  sourceName?: string;
+  publishedAt: string; // ✅ FIXED
 }
 
-interface Props {
+interface NewsCardProps {
   article: Article;
-  index: number;
-  isHero?: boolean;
 }
 
-export default function NewsCard({ article, isHero }: Props) {
-
-  const handleClick = async () => {
-    try {
-      await fetch(`${BACKEND_URL}/api/news/interact/${article._id}`, {
-        method: "POST"
-      });
-    } catch {}
-    window.open(article.url, "_blank");
-  };
-
+export default function NewsCard({ article }: NewsCardProps) {
   return (
     <div
-      onClick={handleClick}
       style={{
-        cursor: "pointer",
-        borderRadius: "14px",
-        overflow: "hidden",
-        background: "#111",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.3)"
+        background: "rgba(255,255,255,0.05)",
+        borderRadius: "12px",
+        padding: "16px",
+        marginBottom: "16px",
+        transition: "0.2s ease",
       }}
     >
-      <img
-        src={article.imageUrl || "/fallback.jpg"}
-        alt={article.title}
+      {/* IMAGE */}
+      {article.imageUrl && (
+        <img
+          src={article.imageUrl}
+          alt={article.title}
+          style={{
+            width: "100%",
+            height: "180px",
+            objectFit: "cover",
+            borderRadius: "10px",
+            marginBottom: "12px",
+          }}
+        />
+      )}
+
+      {/* TITLE */}
+      <h3
         style={{
-          width: "100%",
-          height: isHero ? "400px" : "220px",
-          objectFit: "cover"
+          fontSize: "18px",
+          marginBottom: "8px",
+          color: "#fff",
         }}
-      />
+      >
+        {article.title}
+      </h3>
 
-      <div style={{ padding: "16px" }}>
-        <h3
-          style={{
-            fontSize: isHero ? "1.5rem" : "1rem",
-            marginBottom: "8px"
-          }}
-        >
-          {article.title}
-        </h3>
+      {/* SOURCE + TIME */}
+      <p
+        style={{
+          fontSize: "13px",
+          color: "#aaa",
+          marginBottom: "10px",
+        }}
+      >
+        {article.sourceName || "Bharat 24/7"} •{" "}
+        {new Date(article.publishedAt).toLocaleString()}
+      </p>
 
-        <p
-          style={{
-            fontSize: "0.9rem",
-            color: "#aaa"
-          }}
-        >
-          {article.summary}
-        </p>
-      </div>
+      {/* READ MORE */}
+      <Link
+        href={`/article/${article._id}`}
+        style={{
+          color: "#f59e0b",
+          fontSize: "14px",
+          textDecoration: "none",
+          fontWeight: "500",
+        }}
+      >
+        Read more →
+      </Link>
     </div>
   );
 }
