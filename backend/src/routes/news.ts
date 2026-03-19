@@ -5,6 +5,25 @@ import { cacheService } from "../services/cacheService";
 const router = express.Router();
 
 /**
+ * 🆕 GET ALL NEWS (HOME FEED)
+ */
+router.get("/", async (req, res) => {
+  try {
+    const articles = await Article.find()
+      .sort({ publishedAt: -1 })
+      .limit(20);
+
+    res.json({
+      source: "home",
+      data: articles,
+    });
+  } catch (error) {
+    console.error("Home fetch failed:", error);
+    res.status(500).json({ message: "Failed to fetch news" });
+  }
+});
+
+/**
  * 🧠 GET NEWS BY CATEGORY (Intelligent + Cached)
  */
 router.get("/category/:category", async (req, res) => {
@@ -31,7 +50,6 @@ router.get("/category/:category", async (req, res) => {
 
     const now = new Date();
 
-    // ✅ FIXED MATCH STAGE (USE category FIELD, NOT tags)
     const matchStage =
       category === "home"
         ? {}
@@ -39,7 +57,6 @@ router.get("/category/:category", async (req, res) => {
 
     const articles = await Article.aggregate([
       { $match: matchStage },
-
       {
         $addFields: {
           hoursSince: {
@@ -50,7 +67,6 @@ router.get("/category/:category", async (req, res) => {
           },
         },
       },
-
       {
         $addFields: {
           recencyBoost: {
@@ -62,7 +78,6 @@ router.get("/category/:category", async (req, res) => {
           },
         },
       },
-
       {
         $addFields: {
           finalScore: {
@@ -75,7 +90,6 @@ router.get("/category/:category", async (req, res) => {
           },
         },
       },
-
       { $sort: { finalScore: -1 } },
       { $skip: (page - 1) * limit },
       { $limit: limit },
@@ -122,7 +136,6 @@ router.post("/view/:id", async (req, res) => {
       },
     });
 
-    // 🔥 Clear cache when engagement changes
     cacheService.flush();
 
     res.json({ success: true });
