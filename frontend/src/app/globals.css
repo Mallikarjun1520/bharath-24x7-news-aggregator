@@ -1171,3 +1171,75 @@ body {
   from { transform: translateX(100%); }
   to { transform: translateX(-100%); }
 }
+/* =========================
+   🔥 FIX 1: REMOVE BLUE LINKS
+   ========================= */
+a,
+a:visited,
+a:hover,
+a:active {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* =========================
+   🔥 FIX 2: CLEAN NEWS TITLE (NO LINK LOOK)
+   ========================= */
+.news-card-title {
+  color: var(--text-primary);
+}
+
+.news-card-title:hover {
+  color: var(--accent-saffron);
+}
+
+/* =========================
+   🔥 FIX 3: BREAKING SECTION IMPROVEMENT
+   (Readable + Smooth)
+   ========================= */
+
+/* Make breaking items not look like links */
+.breaking-item {
+  text-decoration: none !important;
+  color: white !important;
+}
+
+/* OPTIONAL: slightly better spacing */
+.breaking-scroll {
+  gap: 32px; /* was 24px */
+}
+
+/* =========================
+   🔥 FIX 4: SLOW DOWN TICKER (VERY IMPORTANT)
+   ========================= */
+
+/* You currently have 20s → too fast */
+.breaking-track {
+  animation: scroll 60s linear infinite !important;
+}
+
+/* Pause when user hovers (pro UX) */
+.breaking-container:hover .breaking-track {
+  animation-play-state: paused;
+}
+
+/* =========================
+   🔥 FIX 5: IMPROVE READABILITY
+   ========================= */
+.breaking-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+.breaking-time {
+  color: #9ca3af;
+}
+
+/* =========================
+   🔥 FIX 6: CARD HOVER POLISH
+   ========================= */
+.news-card:hover {
+  transform: translateY(-4px);
+  transition: all 0.25s ease;
+}
