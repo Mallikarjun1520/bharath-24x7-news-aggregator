@@ -1,6 +1,7 @@
 import express from "express";
 import Article from "../models/Article";
 import { cacheService } from "../services/cacheService";
+import { ingestAllEnglishNews } from "../services/newsService";
 
 const router = express.Router();
 
@@ -20,6 +21,19 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.error("Home fetch failed:", error);
     res.status(500).json({ message: "Failed to fetch news" });
+  }
+});
+
+/**
+ * 🚀 MANUAL FETCH NEWS (IMPORTANT)
+ */
+router.get("/fetch-now", async (req, res) => {
+  try {
+    const count = await ingestAllEnglishNews();
+    res.json({ message: `Fetched ${count} articles` });
+  } catch (err: any) {
+    console.error("Fetch failed:", err);
+    res.status(500).json({ message: "Fetch failed" });
   }
 });
 
@@ -110,16 +124,19 @@ router.get("/category/:category", async (req, res) => {
 
 /**
  * 📄 GET SINGLE ARTICLE
+ * ⚠️ ALWAYS KEEP THIS LAST AMONG GET ROUTES
  */
 router.get("/:id", async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
+
     if (!article) {
       return res.status(404).json({ message: "Article not found" });
     }
 
     res.json(article);
   } catch (error) {
+    console.error("Single fetch error:", error);
     res.status(500).json({ message: "Failed to fetch article" });
   }
 });

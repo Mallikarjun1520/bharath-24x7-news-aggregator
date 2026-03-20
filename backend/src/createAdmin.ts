@@ -1,63 +1,47 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+import User from "./models/User"; // adjust if path differs
 
-const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bharath247';
+dotenv.config();
 
-// User schema
-const userSchema = new mongoose.Schema(
-  {
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    name: { type: String, required: true },
-    interests: [{ type: String }],
-    savedArticles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Article' }],
-    role: { type: String, enum: ['user', 'admin'], default: 'user' }
-  },
-  { timestamps: true }
-);
-
-const User = mongoose.model('User', userSchema);
-
-async function createAdmin() {
+const createAdmin = async () => {
   try {
-    await mongoose.connect(mongoURI);
-    console.log("✅ MongoDB connected");
+    // 🔌 Connect to DB
+    await mongoose.connect(process.env.MONGO_URI as string);
+    console.log("✅ Connected to MongoDB");
 
-    const adminEmail = "admin@bharath247.com";
-    const adminPassword = "Admin@123456";
-    const adminName = "Admin User";
+    const email = "admin@bharat247.com";
+    const password = "admin123";
 
-    const existing = await User.findOne({ email: adminEmail });
+    // 🔐 Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 🔍 Check if admin already exists
+    const existing = await User.findOne({ email });
 
     if (existing) {
-      console.log("⚠️ Admin already exists");
-      await mongoose.disconnect();
+      console.log("⚠ Admin already exists");
       process.exit(0);
     }
 
-    const hashedPassword = await bcrypt.hash(adminPassword, 10);
-
+    // 🧠 Create admin (WITH name FIX)
     await User.create({
-      name: adminName,
-      email: adminEmail,
+      name: "Admin",
+      email,
       password: hashedPassword,
       role: "admin",
-      interests: []
     });
 
-    console.log("\n🎉 Admin created successfully!");
-    console.log("📧 Email:", adminEmail);
-    console.log("🔑 Password:", adminPassword);
+    console.log("🔥 Admin created successfully!");
+    console.log("👉 Email: admin@bharat247.com");
+    console.log("👉 Password: admin123");
 
-    await mongoose.disconnect();
     process.exit(0);
-
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error("❌ Error creating admin:", errorMessage);
-    await mongoose.disconnect();
+  } catch (error: any) {
+    console.error("❌ Error creating admin:", error.message);
     process.exit(1);
   }
-}
+};
 
 createAdmin();
