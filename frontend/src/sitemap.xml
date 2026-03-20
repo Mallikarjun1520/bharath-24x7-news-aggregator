@@ -1,0 +1,24 @@
+import { MetadataRoute } from "next";
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
+    {
+      url: "https://bharath-24x7-news-aggregator.vercel.app",
+      lastModified: new Date(),
+      changeFrequency: "hourly",
+      priority: 1,
+    },
+    {
+      url: "https://bharath-24x7-news-aggregator.vercel.app/login",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: "https://bharath-24x7-news-aggregator.vercel.app/admin",
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.5,
+    },
+  ];
+}
