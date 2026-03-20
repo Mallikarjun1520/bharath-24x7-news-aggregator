@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: "Bharat 24x7 – AI News",
     description:
       "Smart news powered by AI ranking. Fast, clean, and real-time.",
-    url: "https://bharath-24x7-news-aggregator-frontend.vercel.app",
+    url: "https://bharath-24x7-news-aggregator.vercel.app",
     siteName: "Bharat 24x7",
     type: "website",
   },
@@ -27,6 +27,10 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+
+  verification: {
+    google: "google774a8aa511a77d95.html",
   },
 };
 
