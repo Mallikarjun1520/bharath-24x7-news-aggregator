@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bharath-24x7-news-aggregator.vercel.app/sitemap.xml
