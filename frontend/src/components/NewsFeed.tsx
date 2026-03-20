@@ -24,9 +24,6 @@ interface NewsFeedProps {
   isActive: boolean;
 }
 
-/**
- * 🚨 HARD FIX — NO ENV
- */
 const BACKEND_URL =
   "https://bharath-24x7-news-aggregator.onrender.com";
 
@@ -67,13 +64,12 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
           const combined =
             pageNum === 1 ? incoming : [...prev, ...incoming];
 
-          const uniqueMap = new Map();
-          combined.forEach((a) => uniqueMap.set(a._id, a));
-
-          return Array.from(uniqueMap.values());
+          const map = new Map();
+          combined.forEach((a) => map.set(a._id, a));
+          return Array.from(map.values());
         });
       } catch (err) {
-        console.error("Fetch failed:", err);
+        console.error(err);
         setHasMore(false);
       } finally {
         setLoading(false);
@@ -101,9 +97,9 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          fetchPage(nextPage);
+          const next = page + 1;
+          setPage(next);
+          fetchPage(next);
         }
       },
       { rootMargin: "200px" }
@@ -126,40 +122,44 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
   if (!isActive) return null;
   if (initialLoading) return <LoaderSkeleton />;
 
-  let filteredArticles = articles;
+  let filtered = articles;
 
-  if (query.trim() !== "") {
+  if (query.trim()) {
     const fuse = new Fuse(articles, {
       keys: ["title", "summary", "content"],
       threshold: 0.4,
     });
-
-    filteredArticles = fuse.search(query).map((r) => r.item);
+    filtered = fuse.search(query).map((r) => r.item);
   }
 
   return (
-    <div>
+    <div className="container">
       <SearchBar query={query} setQuery={setQuery} />
 
-      {filteredArticles.length === 0 ? (
-        <p>No news available</p>
-      ) : (
-        <>
-          <BreakingHighlights articles={filteredArticles} />
-
-          {filteredArticles[0] && (
-            <NewsCard article={filteredArticles[0]} />
-          )}
-
-          {filteredArticles.slice(1).map((article) => (
-            <NewsCard key={article._id} article={article} />
-          ))}
-        </>
+      {/* 🔥 HERO */}
+      {filtered[0] && (
+        <div className="hero">
+          <img src={filtered[0].imageUrl} />
+          <div className="hero-overlay">
+            <h1>{filtered[0].title}</h1>
+            <p>{filtered[0].summary}</p>
+          </div>
+        </div>
       )}
+
+      {/* 🔴 BREAKING */}
+      <BreakingHighlights articles={filtered} />
+
+      {/* 📰 GRID */}
+      <div className="grid">
+        {filtered.slice(1).map((a) => (
+          <NewsCard key={a._id} article={a} />
+        ))}
+      </div>
 
       <div ref={sentinelRef} />
 
-      {loading && <p>Loading...</p>}
+      {loading && <p className="loading">Loading...</p>}
     </div>
   );
 }
