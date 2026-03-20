@@ -25,29 +25,12 @@ interface NewsFeedProps {
 }
 
 /**
- * ✅ PRODUCTION SAFE BACKEND URL
+ * 🚨 HARD FIX — NO ENV
  */
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
   "https://bharath-24x7-news-aggregator.onrender.com";
 
 const PAGE_SIZE = 10;
-
-const getMockArticles = (category: string, page: number): Article[] => {
-  return Array.from({ length: PAGE_SIZE }).map((_, i) => ({
-    _id: `mock-${category}-p${page}-${i}`,
-    title: `[Demo] ${
-      category.charAt(0).toUpperCase() + category.slice(1)
-    } News: Story ${(page - 1) * PAGE_SIZE + i + 1}`,
-    summary:
-      "Connect your backend to see live news. This is a placeholder article.",
-    url: "#",
-    imageUrl: "",
-    sourceName: "Bharat 24/7",
-    tags: [category],
-    publishedAt: new Date(Date.now() - i * 3600000).toISOString(),
-  }));
-};
 
 export default function NewsFeed({ category, isActive }: NewsFeedProps) {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -68,8 +51,6 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
       setLoading(true);
 
       try {
-        console.log("🔥 Fetching from:", BACKEND_URL);
-
         const res = await fetch(
           `${BACKEND_URL}/api/news/category/${category}?page=${pageNum}&limit=${PAGE_SIZE}`,
           { cache: "no-store" }
@@ -87,20 +68,13 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
             pageNum === 1 ? incoming : [...prev, ...incoming];
 
           const uniqueMap = new Map();
-          combined.forEach((article) => {
-            uniqueMap.set(article._id, article);
-          });
+          combined.forEach((a) => uniqueMap.set(a._id, a));
 
           return Array.from(uniqueMap.values());
         });
       } catch (err) {
-        console.error("❌ Fetch failed:", err);
-
-        if (pageNum === 1) {
-          setArticles(getMockArticles(category, pageNum));
-        } else {
-          setHasMore(false);
-        }
+        console.error("Fetch failed:", err);
+        setHasMore(false);
       } finally {
         setLoading(false);
         setInitialLoading(false);
@@ -164,43 +138,28 @@ export default function NewsFeed({ category, isActive }: NewsFeedProps) {
   }
 
   return (
-    <div className="news-feed-container">
+    <div>
       <SearchBar query={query} setQuery={setQuery} />
 
       {filteredArticles.length === 0 ? (
-        <div className="no-news">
-          <p>🔍 No news found.</p>
-        </div>
+        <p>No news available</p>
       ) : (
         <>
           <BreakingHighlights articles={filteredArticles} />
 
           {filteredArticles[0] && (
-            <div className="hero-wrapper">
-              <NewsCard article={filteredArticles[0]} />
-            </div>
+            <NewsCard article={filteredArticles[0]} />
           )}
 
-          <div className="news-grid">
-            {filteredArticles.slice(1).map((article) => (
-              <NewsCard key={article._id} article={article} />
-            ))}
-          </div>
+          {filteredArticles.slice(1).map((article) => (
+            <NewsCard key={article._id} article={article} />
+          ))}
         </>
       )}
 
-      <div ref={sentinelRef} className="sentinel" />
+      <div ref={sentinelRef} />
 
-      {loading && !initialLoading && (
-        <div className="loading-more">
-          <div className="spinner-small" />
-          <span>Loading more...</span>
-        </div>
-      )}
-
-      {!hasMore && filteredArticles.length > 0 && (
-        <p className="end-of-feed">— You're all caught up —</p>
-      )}
+      {loading && <p>Loading...</p>}
     </div>
   );
 }

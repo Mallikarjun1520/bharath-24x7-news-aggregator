@@ -22,7 +22,7 @@ export default function BreakingHighlights({ articles }: { articles: any[] }) {
   };
 
   const breaking = (articles || [])
-    .filter((a: any) => a?.publishedAt && isWithin24Hours(a.publishedAt))
+    .filter((a) => a?.publishedAt && isWithin24Hours(a.publishedAt))
     .slice(0, 10);
 
   if (breaking.length === 0) return null;
@@ -31,7 +31,7 @@ export default function BreakingHighlights({ articles }: { articles: any[] }) {
     <div>
       <h3>🔴 Breaking</h3>
 
-      {breaking.map((article: any) => (
+      {breaking.map((article) => (
         <div key={article._id}>
           <p>{article.title}</p>
           <small>
